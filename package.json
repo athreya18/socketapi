@@ -2,26 +2,28 @@
   "name": "ts-api",
   "version": "1.0.0",
   "main": "index.js",
-  "type":"commonjs",
+  "type": "commonjs",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "nodemon index.js"
-
+    "start": "nodemon index.js",
+    "build": "tsc"
   },
   "author": "",
   "license": "ISC",
   "description": "",
   "dependencies": {
+    "@google-cloud/vertexai": "^1.1.0",
     "axios": "^1.6.7",
     "cors": "^2.8.5",
     "dotenv": "^16.4.5",
     "express": "^4.19.2",
     "express-session": "^1.18.0",
-    "joi": "^17.12.2",
+    "joi": "^17.12.3",
     "netstat": "^0.0.2",
     "pg": "^8.11.5",
     "sequelize": "^6.37.2",
     "socket.io": "^4.7.5",
+    "typescript": "^5.4.5",
     "uuid": "^9.0.1"
   }
 }
