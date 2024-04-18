@@ -9,10 +9,19 @@ require('dotenv').config()
 const {v4 : uuidv4} =  require("uuid")
 
 const app = express();
-app.use(cors());
+
+app.use(cors({
+    origin:'*',
+    methods:['GET','PUT','POST','DELETE']
+}));
+
 app.use(express.json());
 const server = createServer(app);
-const io = new Server(server);
+const io = new Server(server, {
+    cors: {
+        origin: '*'
+    }
+});
 
 let todos: any=[];
 
@@ -31,6 +40,7 @@ const pool= new Pool(poolConfig)
 
 pool.connect((err: any) => {
     if (err) {
+        console.log(process.env.DB_URL)
         return console.error('Error acquiring client', err);
     }
     console.log('Connected to PostgreSQL database');
@@ -60,7 +70,6 @@ app.get('/api/todos', async(req: any, res: any) =>{
         return res.status(500).send('Internal Server Error')
     }
 });
-
 
 app.get('/api/todos/:id', (req: any, res: any) => {
     const todo = todos.find((c: any) => c.id === (req.params.id));
@@ -112,7 +121,6 @@ app.get('/api/posts/:year/:month', (req: any, res: any) =>{
     res.send(req.query);
 });
 
-
 //PUT
 app.put('/api/todos/:id',async (req: any, res: any) =>{
     //Look up the todo, else return 404
@@ -151,7 +159,6 @@ app.put('/api/todos/:id',async (req: any, res: any) =>{
 
     const updateQuery= 'UPDATE todos SET title = $1, description= $2,status =$3, "updatedat"=now() WHERE id= $4';   
     const updateValues=[title,description,status,taskId]
-
     try{
         await pool.query(updateQuery,updateValues);
         console.log('Task updated in database');
