@@ -23,6 +23,63 @@ const io = new Server(server, {
     }
 });
 
+// VERTEX AI 
+const { VertexAI }= require('@google-cloud/vertexai')
+const vertex_ai= new VertexAI({project:'sharp-starlight-420709',location:'us-central1'});
+const model='gemini-1.0-pro-002';
+
+const generativeModel=vertex_ai.preview.getGenerativeModel({
+    model:model,
+    generationConfig:{
+        'maxOutputTokens':50,
+        'temperature':1,
+        'topP':1,
+    },
+    safetysettings:[
+        {
+            'category': 'HARM_CATEGORY_HATE_SPEECH',
+            'threshold': 'BLOCK_MEDIUM_AND_ABOVE'
+        },
+        {
+            'category': 'HARM_CATEGORY_DANGEROUS_CONTENT',
+            'threshold': 'BLOCK_MEDIUM_AND_ABOVE'
+        },
+        {
+            'category': 'HARM_CATEGORY_SEXUALLY_EXPLICIT',
+            'threshold': 'BLOCK_MEDIUM_AND_ABOVE'
+        },
+        {
+            'category': 'HARM_CATEGORY_HARASSMENT',
+            'threshold': 'BLOCK_MEDIUM_AND_ABOVE'
+        }
+    ],
+});
+
+async function generateContent(){
+    const req={
+        contents:[
+            {role:'user',parts:[{text:'Hello'}]}
+        ],
+    };
+
+    const streamingResp= await generativeModel.generativeContentStream(req);
+    const generateContent=[];
+    for await (const item of streamingResp.stream){
+        generateContent.push(item);
+    }
+    return generateContent;
+}
+
+app.get('/api/generate-content',async(req:any,res:any)=>{
+    try{
+        const generatedContent= await generateContent();
+        res.json(generatedContent);
+    }catch(error){
+        console.log('Error generating content:',error);
+        res.send(500).send('internal server error');
+    }
+});
+
 let todos: any=[];
 
 const { Pool }=require('pg');
