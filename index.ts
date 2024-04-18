@@ -105,8 +105,7 @@ app.post('/api/todos', async (req: any, res: any) => {
             updatedAt: new Date()
         };
         
-            // Broadcast the received message to all connected clients
-            io.emit('message', insertedTask);        
+        io.emit('newTask',insertedTask);
         //   io.on('disconnect', () => {
         //     console.log('Client disconnected');
         //   });
