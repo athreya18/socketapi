@@ -7,8 +7,8 @@ const { join } = require('node:path');
 const { Server } = require('socket.io');
 require('dotenv').config()
 const {v4 : uuidv4} =  require("uuid")
-
 const app = express();
+const { VertexAI }= require('@google-cloud/vertexai')
 
 app.use(cors({
     origin:'*',
@@ -24,14 +24,16 @@ const io = new Server(server, {
 });
 
 // VERTEX AI 
-const { VertexAI }= require('@google-cloud/vertexai')
-const vertex_ai= new VertexAI({project:'sharp-starlight-420709',location:'us-central1'});
-const model='gemini-1.0-pro-002';
+const vertex_ai= new VertexAI({project:'sharp-starlight-420709',
+location:'us-central1', 
+Credential: process.env.GOOGLE_CREDS,
+});
+const model='gemini-1.0-pro';
 
-const generativeModel=vertex_ai.preview.getGenerativeModel({
+const generativeModel = vertex_ai.getGenerativeModel({
     model:model,
     generationConfig:{
-        'maxOutputTokens':50,
+        'maxOutputTokens':25,
         'temperature':1,
         'topP':1,
     },
@@ -55,46 +57,44 @@ const generativeModel=vertex_ai.preview.getGenerativeModel({
     ],
 });
 
-async function generateContent(){
+async function generateContentRes(title: string){
     const req={
         contents:[
-            {role:'user',parts:[{text:'Hello'}]}
+            {role:'user',parts:[{text:`I'm building todo application for users to manage their tasks. Your job is to generate a short and COMPLETE description in one line when I give Todo task title as an input to you.Dont include ## in the start of the response. The output should not contain anything else, just the description for the todo task title.It should be complete and not half baked.
+                        my title is : ${title}`}]}
         ],
     };
-
-    const streamingResp= await generativeModel.generativeContentStream(req);
-    const generateContent=[];
-    for await (const item of streamingResp.stream){
-        generateContent.push(item);
-    }
-    return generateContent;
+    console.log({generativeModel})
+    const result = await generativeModel.generateContent(req);
+    const response = result.response;
+    const name = undefined;
+    console.log({res: response.candidates[0]?.content?.parts[0]?.text})
+    console.log('Response: ', JSON.stringify(response));
+    return response.candidates[0]?.content?.parts[0]?.text
 }
 
-app.get('/api/generate-content',async(req:any,res:any)=>{
+app.post('/api/generate-content',async(req:any,res:any)=>{
     try{
-        const generatedContent= await generateContent();
-        res.json(generatedContent);
+        const generatedContent= await generateContentRes(req.body.title || "");
+        res.status(200).json({description: generatedContent});
     }catch(error){
         console.log('Error generating content:',error);
-        res.send(500).send('internal server error');
+        res.sendStatus(500).send('internal server error');
     }
 });
-
-let todos: any=[];
+let todos:any= [];
 
 const { Pool }=require('pg');
 
 const poolConfig = {
     connectionString: process.env.DB_URL,
-    // user:process.env.DB_USER,
-    // password:process.env.DB_PASSWORD,
     // host:process.env.DB_HOST,
+    // password:process.env.DB_PASSWORD,
     // database:process.env.DB_NAME,
+    // user:process.env.DB_USER,
     // port: process.env.DB_PORT,
 }
-
 const pool= new Pool(poolConfig)
-
 pool.connect((err: any) => {
     if (err) {
         console.log(process.env.DB_URL)
@@ -102,8 +102,8 @@ pool.connect((err: any) => {
     }
     console.log('Connected to PostgreSQL database');
     // client.query('SELECT current_user', (err, result) => {
-        //     release();
-        //     if (err) {
+    //         release(); 
+    //         if (err) {
     //         return console.error('Error executing query', err.stack);
     //     }
     //     console.log('Current user:', result.rows[0].current_user);
@@ -118,10 +118,10 @@ app.get('/api/todos', async(req: any, res: any) =>{
     try{
         const queryText = 'SELECT * FROM todos';
         const result= await pool.query(queryText);
-    
+        
         const todos=result.rows;
         res.status(200).json(todos);
-
+    
     }catch(error){
         console.log({error})
         return res.status(500).send('Internal Server Error')
@@ -131,7 +131,7 @@ app.get('/api/todos', async(req: any, res: any) =>{
 app.get('/api/todos/:id', (req: any, res: any) => {
     const todo = todos.find((c: any) => c.id === (req.params.id));
     if (!todo) {
-    res.status(404).send('The todo with the given ID was not found');
+        res.status(404).send('The todo with the given ID was not found');
     }
     res.send(todo);
 });
@@ -142,10 +142,8 @@ app.post('/api/todos', async (req: any, res: any) => {
     const taskId = uuidv4()
     const { error } = validateTodo(req.body);
     if (error) {
-        // 400 Bad Request
         return res.status(400).send(error.details[0].message);
     }
-
     // todos.push(todo);
     const queryText ='INSERT INTO todos (id, title, description, status, createdAt, updatedAt) VALUES ($1,$2,$3,$4, now(), now())';
     const queryValues=[taskId,title,description,status];
@@ -242,9 +240,7 @@ app.delete('/api/todos/:id', async(req: any,res: any) => {
     try {
         await pool.query(queryText, queryValues);
         console.log('Task deleted successfully');
-
         io.emit('taskDeleted', todoId);
-       
         todos = todos.filter((todo : any)=> todo.id !== todoId);
         // res.send(todos)
         return  res.status(200).send({"status": "success"});
@@ -259,13 +255,11 @@ app.delete('/api/todos', async(req: any,res: any) => {
     const queryValues = ['completed'];
     try {
         await pool.query(queryText, queryValues);
-        console.log('Completed tasks deleted successfully');
-
+        // console.log('Completed tasks deleted successfully');
+        console.log("12345678")
         io.emit('tasksDeleted');
-
         const updatedTasksResult = await pool.query('SELECT * FROM todos');
         const updatedTasks = updatedTasksResult.rows;
-        
         return res.status(200).json(updatedTasks);
     } catch (error) {
         console.error('Error deleting completed tasks:', error);
@@ -274,7 +268,7 @@ app.delete('/api/todos', async(req: any,res: any) => {
 });
 
 io.on('connection', (socket: any) => {
-  console.log('a user connected');
+//   console.log('a user connected');
 
   socket.on('disconnect', () => {
     console.log('user disconnected');
