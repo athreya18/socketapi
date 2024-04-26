@@ -26,7 +26,7 @@ const io = new Server(server, {
 // VERTEX AI 
 const vertex_ai= new VertexAI({project:'sharp-starlight-420709',
 location:'us-central1', 
-Credential: process.env.GOOGLE_CREDS,
+// Credential: process.env.GOOGLE_CREDS,
 });
 const model='gemini-1.0-pro';
 
@@ -118,10 +118,8 @@ app.get('/api/todos', async(req: any, res: any) =>{
     try{
         const queryText = 'SELECT * FROM todos';
         const result= await pool.query(queryText);
-        
         const todos=result.rows;
         res.status(200).json(todos);
-    
     }catch(error){
         console.log({error})
         return res.status(500).send('Internal Server Error')
@@ -274,7 +272,6 @@ io.on('connection', (socket: any) => {
     console.log('user disconnected');
 });
 });
-
 
 server.listen(3001, () => {
     console.log('server running at http://localhost:3001');
