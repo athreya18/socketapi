@@ -71,6 +71,7 @@ async function generateContentRes(title: string){
 
 app.post('/api/generate-content',async(req:any,res:any)=>{
     try{
+        console.log("ABCD")
         const generatedContent= await generateContentRes(req.body.title || "");
         res.status(200).json({description: generatedContent});
     }catch(error){
