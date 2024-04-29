@@ -52,7 +52,6 @@ const generativeModel = vertex_ai.getGenerativeModel({
         }
     ],
 });
-
 async function generateContentRes(title: string){
     const req={
         contents:[
@@ -61,7 +60,7 @@ async function generateContentRes(title: string){
         ],
     };
     console.log({generativeModel})
-    const result = await generativeModel.generateContent(req);
+    const result = await generativeModel?.generateContent(req);
     console.log("ABCD")
     const resp = result.response;
     console.log({res: resp.candidates[0]?.content?.parts[0]?.text})
