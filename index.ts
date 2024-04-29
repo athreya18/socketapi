@@ -22,7 +22,7 @@ const io = new Server(server, {
 // VERTEX AI 
 const vertex_ai= new VertexAI({project:'sharp-starlight-420709',
 location:'us-central1', 
-Credential: process.env.GOOGLE_AUTH,
+Credential: process.env.GOOGLE_CREDS,
 });
 
 const model='gemini-1.0-pro';
@@ -52,6 +52,7 @@ const generativeModel = vertex_ai.getGenerativeModel({
         }
     ],
 });
+
 async function generateContentRes(title: string){
     const req={
         contents:[
@@ -60,12 +61,12 @@ async function generateContentRes(title: string){
         ],
     };
     console.log({generativeModel})
-    const result = await generativeModel?.generateContent(req);
-    console.log("ABCD")
+    const result = await generativeModel.generateContent(req);
+    console.log("ABCD");
     const resp = result.response;
     console.log({res: resp.candidates[0]?.content?.parts[0]?.text})
     console.log('Response: ', JSON.stringify(resp));
-    return resp.candidates[0]?.content?.parts[0]?.text
+    return resp.candidates[0]?.content?.parts[0]?.text;
 }
 
 app.post('/api/generate-content',async(req:any,res:any)=>{
