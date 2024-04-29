@@ -82,6 +82,7 @@ app.post('/api/generate-content',async(req:any,res:any)=>{
         res.sendStatus(500).send('internal server error');
     }
 });
+
 let todos:any= [];
 
 const { Pool }=require('pg');
@@ -166,6 +167,7 @@ app.post('/api/todos', async (req: any, res: any) => {
     }catch(error){
         console.log({error})
         return res.status(500).send('Internal Server Error')
+        
     }
 });
 
@@ -273,7 +275,7 @@ io.on('connection', (socket: any) => {
 });
 });
 
-server.listen(3001, () => {
+server.listen(process.env.PORT, () => {
     console.log('server running at http://localhost:3001');
   });
 
