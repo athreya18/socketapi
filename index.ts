@@ -62,11 +62,11 @@ async function generateContentRes(title: string){
     };
     console.log({generativeModel})
     const result = await generativeModel.generateContent(req);
-    const response = result.response;
+    const resp = result.response;
     console.log("ABCD")
-    console.log({res: response.candidates[0]?.content?.parts[0]?.text})
-    console.log('Response: ', JSON.stringify(response));
-    return response.candidates[0]?.content?.parts[0]?.text
+    console.log({res: resp.candidates[0]?.content?.parts[0]?.text})
+    console.log('Response: ', JSON.stringify(resp));
+    return resp.candidates[0]?.content?.parts[0]?.text
 }
 
 app.post('/api/generate-content',async(req:any,res:any)=>{
