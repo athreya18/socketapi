@@ -22,7 +22,7 @@ const io = new Server(server, {
 // VERTEX AI 
 const vertex_ai= new VertexAI({project:'sharp-starlight-420709',
 location:'us-central1', 
-// Credential: process.env.GOOGLE_CREDS,
+// Credential: process.env.,
 });
 
 const model='gemini-1.0-pro';
@@ -142,7 +142,7 @@ app.post('/api/todos', async (req: any, res: any) => {
         return res.status(400).send(error.details[0].message);
     }
     // todos.push(todo);
-    const queryText ='INSERT INTO todos (id, title, description, sta9tus, createdAt, updatedAt) VALUES ($1,$2,$3,$4, now(), now())';
+    const queryText ='INSERT INTO todos (id, title, description, status, createdAt, updatedAt) VALUES ($1,$2,$3,$4, now(), now())';
     const queryValues=[taskId,title,description,status];
     
     try{    
