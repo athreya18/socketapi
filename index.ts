@@ -1,6 +1,5 @@
 import cors from "cors";
 import Joi from "joi";
-
 const express = require('express');
 const { createServer } = require('node:http');
 const { join } = require('node:path');
@@ -10,10 +9,7 @@ const {v4 : uuidv4} =  require("uuid")
 const app = express();
 const { VertexAI }= require('@google-cloud/vertexai')
 
-app.use(cors({
-    origin:'*',
-    methods:['GET','PUT','POST','DELETE']
-}));
+app.use(cors());
 
 app.use(express.json());
 const server = createServer(app);
@@ -28,8 +24,8 @@ const vertex_ai= new VertexAI({project:'sharp-starlight-420709',
 location:'us-central1', 
 Credential: process.env.GOOGLE_AUTH,
 });
-const model='gemini-1.0-pro';
 
+const model='gemini-1.0-pro';
 const generativeModel = vertex_ai.getGenerativeModel({
     model:model,
     generationConfig:{
@@ -95,6 +91,7 @@ const poolConfig = {
     // user:process.env.DB_USER,
     // port: process.env.DB_PORT,
 }
+console.log("pool config:", poolConfig)
 const pool= new Pool(poolConfig)
 pool.connect((err: any) => {
     if (err) {
@@ -144,7 +141,7 @@ app.post('/api/todos', async (req: any, res: any) => {
         return res.status(400).send(error.details[0].message);
     }
     // todos.push(todo);
-    const queryText ='INSERT INTO todos (id, title, description, status, createdAt, updatedAt) VALUES ($1,$2,$3,$4, now(), now())';
+    const queryText ='INSERT INTO todos (id, title, description, sta9tus, createdAt, updatedAt) VALUES ($1,$2,$3,$4, now(), now())';
     const queryValues=[taskId,title,description,status];
     
     try{    
