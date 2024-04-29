@@ -22,7 +22,7 @@ const io = new Server(server, {
 // VERTEX AI 
 const vertex_ai= new VertexAI({project:'sharp-starlight-420709',
 location:'us-central1', 
-Credential: process.env.GOOGLE_CREDS,
+// Credential: process.env.GOOGLE_CREDS,
 });
 
 const model='gemini-1.0-pro';
