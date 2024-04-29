@@ -62,8 +62,8 @@ async function generateContentRes(title: string){
     };
     console.log({generativeModel})
     const result = await generativeModel.generateContent(req);
-    const resp = result.response;
     console.log("ABCD")
+    const resp = result.response;
     console.log({res: resp.candidates[0]?.content?.parts[0]?.text})
     console.log('Response: ', JSON.stringify(resp));
     return resp.candidates[0]?.content?.parts[0]?.text
