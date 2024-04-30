@@ -9,7 +9,9 @@ const {v4 : uuidv4} =  require("uuid")
 const app = express();
 const { VertexAI }= require('@google-cloud/vertexai')
 
-app.use(cors());
+app.use(cors({
+    origin:'*'
+}));
 
 app.use(express.json());
 const server = createServer(app);
