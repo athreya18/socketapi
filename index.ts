@@ -56,6 +56,10 @@ const generativeModel = vertex_ai.getGenerativeModel({
 });
 
 async function generateContentRes(title: string){
+    if (!title)
+        {
+            return '';
+        }
     const req={
         contents:[
             {role:'user',parts:[{text:`I'm building todo application for users to manage their tasks. Your job is to generate a short and COMPLETE description in one line when I give Todo task title as an input to you.Dont include ## in the start of the response. The output should not contain anything else, just the description for the todo task title.It should be complete and not half baked.
